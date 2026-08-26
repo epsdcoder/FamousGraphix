@@ -1,0 +1,91 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Admin Login — Famous Portfolio</title>
+  <meta name="description" content="Admin login for the portfolio dashboard.">
+  <link rel="stylesheet" href="css/style.css">
+  <link rel="stylesheet" href="css/responsive.css">
+  <link rel="icon" type="image/x-icon" href="icon.png">
+  <style>
+    .forgot-panel { display: none; }
+    .forgot-panel.is-open { display: block; }
+    .forgot-link {
+      display: block; text-align: right;
+      font-size: var(--fs-small);
+      color: var(--color-accent);
+      margin-top: -8px; margin-bottom: var(--space-3);
+      cursor: pointer; background: none; border: none; padding: 0;
+    }
+    .forgot-link:hover { text-decoration: underline; }
+    .back-link {
+      display: inline-block; font-size: var(--fs-small);
+      color: #8888a8; cursor: pointer; margin-bottom: var(--space-3);
+      background: none; border: none; padding: 0;
+    }
+    .back-link:hover { color: var(--color-accent); }
+  </style>
+</head>
+<body>
+  <a class="skip-link" href="#main-content">Skip to content</a>
+
+  <main id="main-content" style="display:flex; align-items:center; justify-content:center; min-height:100vh; padding: var(--space-3);">
+    <div class="login-box" style="margin:0; width:100%;">
+
+      <div class="text-center mt-2" style="margin-bottom: var(--space-2);">
+        <img src="joel1.jpg" alt="Profile photo" style="width:64px; height:64px; border-radius:50%; object-fit:cover; margin:0 auto var(--space-2); border:2px solid transparent; background: linear-gradient(#0d0d1a,#0d0d1a) padding-box, linear-gradient(135deg,#4db6ac,#a78bfa) border-box;">
+        <h3 style="margin-bottom:0;">Famous</h3>
+        <p style="margin:0; font-size: var(--fs-small); color: #8888a8;">Designer &amp; Photographer</p>
+      </div>
+
+      <!-- Login panel -->
+      <div id="login-panel">
+        <h1>Admin Login</h1>
+        <p>Sign in with your email to manage your portfolio.</p>
+        <form id="login-form">
+          <div class="form-group">
+            <label for="login-email">Email</label>
+            <input type="email" id="login-email" placeholder="your@email.com" required autocomplete="email">
+          </div>
+          <div class="form-group">
+            <label for="login-password">Password</label>
+            <input type="password" id="login-password" placeholder="••••••••" required autocomplete="current-password">
+          </div>
+          <button type="button" class="forgot-link" id="forgot-link">Forgot password?</button>
+          <button class="btn btn--accent btn--block" type="submit" id="login-btn">Sign In</button>
+          <div class="form-status" id="login-status" role="status" aria-live="polite"></div>
+        </form>
+      </div>
+
+      <!-- Forgot password panel -->
+      <div id="forgot-panel" class="forgot-panel">
+        <button type="button" class="back-link" id="back-link">← Back to login</button>
+        <h1>Reset Password</h1>
+        <p>Enter your email and we'll send you a reset link.</p>
+        <form id="forgot-form">
+          <div class="form-group">
+            <label for="forgot-email">Email</label>
+            <input type="email" id="forgot-email" placeholder="your@email.com" required autocomplete="email">
+          </div>
+          <button class="btn btn--accent btn--block" type="submit" id="forgot-btn">Send Reset Email</button>
+          <div class="form-status" id="forgot-status" role="status" aria-live="polite"></div>
+        </form>
+      </div>
+
+      <p class="mt-2 text-center" style="font-size:var(--fs-small);">
+        <a href="index.html">← Back to website</a>
+      </p>
+      <p class="mt-2 text-center"><a href="#">← POWERED BY EPS</a></p>
+
+    </div>
+  </main>
+
+  <!-- Firebase CDN -->
+  <script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-app-compat.js"></script>
+  <script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-auth-compat.js"></script>
+  <script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-firestore-compat.js"></script>
+  <script src="js/firebase.js"></script>
+  <script src="js/login.js"></script>
+</body>
+</html>

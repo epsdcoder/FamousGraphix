@@ -1,0 +1,144 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Famous Portfolio</title>
+  <meta name="description" content="A photography & design portfolio.">
+  <link rel="stylesheet" href="css/style.css">
+  <link rel="stylesheet" href="css/responsive.css">
+
+</head>
+<link rel="icon" type="image/x-icon" href="icon.png">
+<body>
+  <a class="skip-link" href="#main-content">Skip to content</a>
+
+  Mobile top bar
+  <header class="topbar">
+    <div class="topbar__brand">
+      <img class="topbar__avatar" src="images/avatar.svg" alt="Profile photo">
+      <span>Portfolio</span>
+    </div>
+    <button class="topbar__toggle" type="button" data-sidebar-toggle aria-label="Open menu" aria-expanded="false">
+      <span></span>
+    </button>
+  </header>
+
+  <div class="sidebar-overlay"></div>
+  
+  <div class="app-shell">
+  
+    <aside class="sidebar">
+      <img class="sidebar__avatar" src="joel1.jpg" alt="Profile photo">
+      <div class="sidebar__title">Famous</div>
+      <div class="sidebar__subtitle">Designer & Photographer</div>
+      <nav aria-label="Main navigation">
+        <ul class="sidebar__nav">
+          <li><a href="html1.html">PORTFOLIO</a></li>
+          <li><a href="about1.html">ABOUT</a></li>
+          <li><a href="contact1.html">CONTACT</a></li>
+          <li><a href="admin.html">DASHBOARD</a></li>
+        </ul>
+      </nav>
+      <div class="sidebar__social"></div>
+    </aside>
+
+   <main class="main" id="main-content">
+      <div class="page-header">
+        <h1>Contact Me</h1>
+        <p id="contact-intro-text">Loading…</p>
+      </div>
+
+      <section class="section">
+        <div class="contact-grid">
+          <form id="contact-form" novalidate>
+            <div class="form-group">
+              <label for="name">Name</label>
+              <input type="text" id="name" name="name" placeholder="Your full name" required minlength="2">
+            </div>
+            <div class="form-group">
+              <label for="email">Email</label>
+              <input type="email" id="email" name="email" placeholder="you@example.com" required>
+            </div>
+            <div class="form-group">
+              <label for="message">Message</label>
+              <textarea id="message" name="message" placeholder="Tell me about your project…" required minlength="10"></textarea>
+            </div>
+            <button class="btn btn--accent" type="submit" id="contact-submit">Send Message</button>
+            <a class="btn btn--outline mt-2" id="whatsapp-btn" href="#" target="_blank" rel="noopener" style="display:inline-block;">Or Chat on WhatsApp</a>
+            <div class="form-status" id="form-status" role="status" aria-live="polite"></div>
+          </form>
+
+          <aside class="contact-info">
+            <h3>Other ways to reach me</h3>
+            <div class="contact-info__item">
+              <strong>Email</strong>
+              <span id="contact-email-text">Loading…</span>
+            </div>
+            <div class="contact-info__item">
+              <strong>Location</strong>
+              <span id="contact-location-text">Loading…</span>
+            </div>
+            <div class="contact-info__item">
+              <strong>Response time</strong>
+              <span id="contact-response-text">Loading…</span>
+            </div>
+          </aside>
+        </div>
+      </section>
+      <footer class="footer">
+        <div class="footer-grid">
+          <div>
+            <h2>FAMOUS GRAPHIX</h2>
+            <p></p>
+            <p>Powered by <a href="https://www.w3schools.com/w3css/" target="_blank" rel="noopener">EPS</a></p>
+          </div>
+          <div>
+            <h2>BLOG POSTS</h2>
+            <div class="blog-post">
+              <img src="images/blog-1.svg" alt="">
+              <div class="blog-post__meta">
+                <strong>Lorem</strong>
+                <span>Sed mattis nunc</span>
+              </div>
+            </div>
+            <div class="blog-post">
+              <img src="images/blog-2.svg" alt="">
+              <div class="blog-post__meta">
+                <strong>Ipsum</strong>
+                <span>Praes tinci sed</span>
+              </div>
+            </div>
+          </div>
+          <div>
+            <h2>POPULAR TAGS</h2>
+            <div class="tag-list">
+              <span class="tag is-active">Travel</span>
+              <span class="tag">New York</span>
+              <span class="tag">London</span>
+              <span class="tag">IKEA</span>
+              <span class="tag">NORWAY</span>
+              <span class="tag">DIY</span>
+              <span class="tag">Ideas</span>
+              <span class="tag">Baby</span>
+              <span class="tag">Family</span>
+              <span class="tag">News</span>
+              <span class="tag">Clothing</span>
+              <span class="tag">Shopping</span>
+              <span class="tag">Sports</span>
+              <span class="tag">Games</span>
+            </div>
+          </div>
+        </div>
+        <div class="footer-bottom">
+          FAMOUS GRAPHIX @2026
+        </div>
+      </footer>
+    </main>
+  </div>
+
+  <script src="js/main.js"></script>
+  <script src="js/contact.js"></script>
+  <script src="js/site-content.js"></script>
+</body>
+</html>

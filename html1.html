@@ -1,0 +1,139 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Famous Portfolio</title>
+  <meta name="description" content="A photography & design portfolio.">
+  <link rel="stylesheet" href="css/style.css">
+  <link rel="stylesheet" href="css/responsive.css">
+
+</head>
+<link rel="icon" type="image/x-icon" href="icon.png">
+<body>
+  <a class="skip-link" href="#main-content">Skip to content</a>
+
+
+  <header class="topbar">
+    <div class="topbar__brand">
+      <img class="topbar__avatar" src="images/avatar.svg" alt="Profile photo">
+      <span>Portfolio</span>
+    </div>
+    <button class="topbar__toggle" type="button" data-sidebar-toggle aria-label="Open menu" aria-expanded="false">
+      <span></span>
+    </button>
+  </header>
+
+  <div class="sidebar-overlay"></div>
+  
+  <div class="app-shell">
+    
+    <aside class="sidebar">
+      <img class="sidebar__avatar" src="joel1.jpg" alt="Profile photo">
+      <div class="sidebar__title">Famous</div>
+      <div class="sidebar__subtitle">Designer & Photographer</div>
+      <nav aria-label="Main navigation">
+        <ul class="sidebar__nav">
+         <li><a href="html1.html">PORTFOLIO</a></li>
+          <li><a href="about1.html">ABOUT</a></li>
+          <li><a href="contact1.html">CONTACT</a></li>
+          <li><a href="admin.html">DASHBOARD</a></li>
+        </ul>
+      </nav>
+      <div class="sidebar__social"></div>
+    </aside>
+
+   
+    <main class="main" id="main-content">
+      <div class="page-header">
+        <h1>My Portfolio</h1>
+        <div class="filters">
+          <span class="filters__label">Filter:</span>
+          <span id="filter-buttons">
+            <button class="filter-btn is-active" data-filter="all" type="button">ALL</button>
+            <button class="filter-btn" data-filter="design" type="button">Design</button>
+            <button class="filter-btn" data-filter="photos" type="button">Photos</button>
+            <button class="filter-btn" data-filter="art" type="button">Art</button>
+          </span>
+        </div>
+      </div>
+
+      
+      <section class="gallery" id="gallery" aria-live="polite">
+        <p class="empty-state" id="gallery-loading">Loading portfolio…</p>
+      </section>
+
+   
+      <section class="section reveal">
+        <h2 class="text-center">What I Do</h2>
+        <div class="services-grid" id="services-container">
+          <p class="empty-state">Loading services…</p>
+        </div>
+      </section>
+
+       
+      <section class="section section--soft reveal">
+        <h2 class="text-center">What Clients Say</h2>
+        <div class="testimonials-grid" id="testimonials-container">
+          <p class="empty-state">Loading testimonials…</p>
+        </div>
+      </section>
+
+      
+      <footer class="footer">
+        <div class="footer-grid">
+          <div>
+            <h2>FAMOUS GRAPHIX</h2>
+            <p></p>
+            <p>Powered by <a href="https://www.w3schools.com/w3css/" target="_blank" rel="noopener">EPS</a></p>
+          </div>
+          <div>
+            <h2>BLOG POSTS</h2>
+            <div class="blog-post">
+              <img src="images/blog-1.svg" alt="">
+              <div class="blog-post__meta">
+                <strong>Lorem</strong>
+                <span>Sed mattis nunc</span>
+              </div>
+            </div>
+            <div class="blog-post">
+              <img src="images/blog-2.svg" alt="">
+              <div class="blog-post__meta">
+                <strong>Ipsum</strong>
+                <span>Praes tinci sed</span>
+              </div>
+            </div>
+          </div>
+          <div>
+            <h2>POPULAR TAGS</h2>
+            <div class="tag-list">
+              <span class="tag is-active">Travel</span>
+              <span class="tag">New York</span>
+              <span class="tag">London</span>
+              <span class="tag">IKEA</span>
+              <span class="tag">NORWAY</span>
+              <span class="tag">DIY</span>
+              <span class="tag">Ideas</span>
+              <span class="tag">Baby</span>
+              <span class="tag">Family</span>
+              <span class="tag">News</span>
+              <span class="tag">Clothing</span>
+              <span class="tag">Shopping</span>
+              <span class="tag">Sports</span>
+              <span class="tag">Games</span>
+            </div>
+          </div>
+        </div>
+        <div class="footer-bottom">
+          FAMOUS GRAPHIX @2026
+        </div>
+      </footer>
+    </main>
+  </div>
+
+  <script src="js/main.js"></script>
+  <script src="js/portfolio.js"></script>
+  <script src="js/site-content.js"></script>
+  <script src="js/services-testimonials.js"></script>
+</body>
+</html>

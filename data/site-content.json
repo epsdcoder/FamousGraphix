@@ -1,0 +1,94 @@
+{
+  "site": {
+    "name": "Big.Joe",
+    "tagline": "The Professional designer",
+    "avatar": "images/1782724148727-924715.jpg",
+    "social": {
+      "instagram": "kfdgajdf",
+      "twitter": "eaehri",
+      "linkedin": "ekhrueh",
+      "youtube": "3rqeur8qery",
+      "whatsapp": "ruy38r"
+    }
+  },
+  "categories": [
+    "design",
+    "photos",
+    "art",
+    "School",
+    "fISH"
+  ],
+  "theme": {
+    "accentColor": "#4db6ac"
+  },
+  "about": {
+    "heroImage1": "images/1782215954609-789582.jpg",
+    "heroImage2": "images/1782215992707-172413.jpg",
+    "bio": "Just me, myself and I, exploring the universe of unknownment. I have a heart of love and an interest of lorem ipsum and mauris neque quam blog. I want to share my world with you. Praesent tincidunt sed tellus ut rutrum. Sed vitae justo condimentum, porta lectus vitae, ultricies congue gravida diam non fringilla. Praesent tincidunt sed tellus ut rutrum. Sed vitae justo condimentum, porta lectus vitae, ultricies congue gravida diam non fringilla.",
+    "skills": [
+      {
+        "name": "Photography",
+        "percent": 95
+      },
+      {
+        "name": "Web Design",
+        "percent": 85
+      },
+      {
+        "name": "Photoshop",
+        "percent": 80
+      }
+    ],
+    "pricing": [
+      {
+        "name": "Basic",
+        "price": 10,
+        "features": [
+          "Web Design",
+          "Photography",
+          "1GB Storage",
+          "Mail Support"
+        ],
+        "featured": false
+      }
+    ]
+  },
+  "contact": {
+    "intro": "Have a project in mind? Send a message and I'll get back to you soon.",
+    "email": "hello@myportfolio.example",
+    "location": "Lagos, Nigeria",
+    "responseTime": "Usually within 1–2 business days",
+    "whatsappNumber": "2348012345678"
+  },
+  "footer": {
+    "text": "Praesent tincidunt sed tellus ut rutrum. Sed vitae justo condimentum, porta lectus vitae, ultricies congue gravida diam non fringilla.",
+    "blogPosts": [
+      {
+        "title": "Lorem",
+        "subtitle": "Sed mattis nunc",
+        "image": "images/blog-1.svg"
+      },
+      {
+        "title": "Ipsum",
+        "subtitle": "Praes tinci sed",
+        "image": "images/blog-2.svg"
+      }
+    ],
+    "tags": [
+      "Travel",
+      "New York",
+      "London",
+      "IKEA",
+      "NORWAY",
+      "DIY",
+      "Ideas",
+      "Baby",
+      "Family",
+      "News",
+      "Clothing",
+      "Shopping",
+      "Sports",
+      "Games"
+    ]
+  }
+}

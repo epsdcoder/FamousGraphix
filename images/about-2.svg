@@ -1,0 +1,7 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="600" height="450" viewBox="0 0 600 450">
+  <rect width="600" height="450" fill="#2d2c8b"/>
+  <rect width="600" height="450" fill="#cfc6b8"/>
+  <circle cx="300" cy="170" r="80" fill="#9c8f7e"/>
+  <path d="M120 420c0-100 80-160 180-160s180 60 180 160" fill="#9c8f7e"/>
+  <text x="300" y="410" font-family="Arial" font-size="20" fill="#5e564a" text-anchor="middle">About photo 2 — replace me</text>
+</svg>

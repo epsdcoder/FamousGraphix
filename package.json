@@ -1,0 +1,17 @@
+{
+  "name": "portfolio-site",
+  "version": "1.0.0",
+  "description": "Multi-page portfolio website with a small Node/Express backend (portfolio API + contact form + simple admin auth).",
+  "main": "server/server.js",
+  "type": "commonjs",
+  "scripts": {
+    "start": "node server/server.js",
+    "dev": "node --watch server/server.js"
+  },
+  "license": "MIT",
+  "dependencies": {
+    "express": "^4.19.2",
+    "firebase-admin": "^14.1.0",
+    "multer": "^2.2.0"
+  }
+}

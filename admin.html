@@ -1,0 +1,436 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Famous Portfolio</title>
+  <meta name="description" content="A photography & design portfolio.">
+  <link rel="stylesheet" href="css/style.css">
+  <link rel="stylesheet" href="css/responsive.css">
+
+</head>
+<link rel="icon" type="image/x-icon" href="icon.png">
+<body>
+  <a class="skip-link" href="#main-content">Skip to content</a>
+
+  <!-- Mobile top bar -->
+  <header class="topbar">
+    <div class="topbar__brand">
+      <img class="topbar__avatar" src="images/avatar.svg" alt="Profile photo">
+      <span>Welcome</span>
+    </div>
+    <button class="topbar__toggle" type="button" data-sidebar-toggle aria-label="Open menu" aria-expanded="false">
+      <span></span>
+    </button>
+  </header>
+
+  <div class="sidebar-overlay"></div>
+  
+  <div class="app-shell">
+    <!-- Sidebar navigation (shared across pages) -->
+    <aside class="sidebar">
+      <img class="sidebar__avatar" src="joel1.jpg" alt="Profile photo">
+      <div class="sidebar__title">Famous</div>
+      <div class="sidebar__subtitle">Designer & Photographer</div>
+      <nav aria-label="Main navigation">
+        <ul class="sidebar__nav">
+          <li><a href="html1.html">PORTFOLIO</a></li>
+          <li><a href="about1.html">ABOUT</a></li>
+          <li><a href="contact1.html">CONTACT</a></li>
+          <li><a href="admin.html">DASHBOARD</a></li>
+        </ul>
+      </nav>
+      <div class="sidebar__social"></div>
+    </aside>
+
+    <main class="main" id="main-content">
+
+      <!-- ---------- Dashboard (login is a separate page: login.html) ---------- -->
+      <div id="dashboard-screen">
+        <div class="page-header">
+          <h1>MY Dashboard</h1>
+          <div class="admin-toolbar">
+            <p style="margin:0;">Manage your portfolio items below.</p>
+            <div>
+              <button class="btn btn--accent btn--small" id="add-item-btn" type="button">+ Add Item</button>
+              <button class="btn btn--outline btn--small" id="logout-btn" type="button">Log Out</button>
+            </div>
+          </div>
+        </div>
+
+        <!-- ---------- Add / Edit item modal ---------- -->
+  <div class="modal-backdrop" id="item-modal">
+    <div class="modal">
+      <h2 id="modal-title">Add Portfolio Item</h2>
+      <form id="item-form">
+        <input type="hidden" id="item-id" value="">
+        <div class="form-group">
+          <label for="item-title">Title</label>
+          <input type="text" id="item-title" required>
+        </div>
+        <div class="form-group">
+          <label for="item-category">Category</label>
+          <select id="item-category" style="width:100%; padding:12px 14px; border:1px solid var(--color-border); border-radius:var(--radius); font-size:1rem;">
+            <option value="design">Design</option>
+            <option value="photos">Photos</option>
+            <option value="art">Art</option>
+          </select>
+        </div>
+        <div class="form-group">
+              <label for="item-image">Image</label>
+              <div style="display:flex; gap:8px; align-items:center;">
+                <input type="text" id="item-image" placeholder="https://… or images/your-file.jpg" required style="flex:1;">
+                <button type="button" id="item-image-upload-btn" class="btn btn--outline btn--small">📁 Upload</button>
+              </div>
+            </div>
+        <div class="form-group">
+          <label for="item-description">Description</label>
+          <textarea id="item-description" rows="3"></textarea>
+        </div>
+        <div class="modal-actions">
+          <button type="button" class="btn btn--outline" id="modal-cancel-btn">Cancel</button>
+          <button type="submit" class="btn btn--accent" id="modal-save-btn">Save</button>
+        </div>
+        <div class="form-status" id="item-form-status" role="status" aria-live="polite"></div>
+      </form>
+    </div>
+  </div>
+
+       <!-- ---------- Edit Portfolio Items ---------- -->
+        <section class="section">
+          <h2>Portfolio Items</h2>
+          <div style="overflow-x:auto;">
+            <table class="admin-table">
+              <thead>
+                <tr>
+                  <th>Image</th>
+                  <th>Title</th>
+                  <th>Category</th>
+                  <th>Description</th>
+                  <th>Actions</th>
+                </tr>
+              </thead>
+              <tbody id="admin-table-body">
+                <tr><td colspan="5">Loading…</td></tr>
+              </tbody>
+            </table>
+          </div>
+        </section>
+
+   <!-- ---------- Edit Contact Page ---------- -->
+        <section class="section">
+          <h2>Edit Contact Page</h2>
+          <form id="contact-edit-form">
+            <div class="form-group">
+              <label for="contact-intro-input">Intro text (under "Contact Me")</label>
+              <input type="text" id="contact-intro-input">
+            </div>
+            <div class="form-group">
+              <label for="contact-email-input">Email shown on page</label>
+              <input type="email" id="contact-email-input">
+            </div>
+            <div class="form-group">
+              <label for="contact-location-input">Location</label>
+              <input type="text" id="contact-location-input">
+            </div>
+            <div class="form-group">
+              <label for="contact-response-input">Response time text</label>
+              <input type="text" id="contact-response-input">
+            </div>
+            <div class="form-group">
+              <label for="contact-whatsapp-input">WhatsApp number (country code + number, no spaces or +)</label>
+              <input type="text" id="contact-whatsapp-input" placeholder="2348012345678">
+            </div>
+            <button type="submit" class="btn btn--accent">Save Contact Page</button>
+            <div class="form-status" id="contact-form-edit-status" role="status" aria-live="polite"></div>
+          </form>
+        </section>
+
+        <!-- ---------- Edit About Page ---------- -->
+        <section class="section section--soft">
+          <h2>Edit About Page</h2>
+          <form id="about-edit-form">
+            <div class="form-group">
+              <label>About hero image 1</label>
+              <div style="display:flex; gap:8px; align-items:center;">
+                <input type="text" id="about-hero-img-1-input" placeholder="images/about-1.svg" style="flex:1;">
+                <button type="button" id="about-hero-img-1-upload-btn" class="btn btn--outline btn--small">📁 Upload</button>
+              </div>
+            </div>
+            <div class="form-group">
+              <label>About hero image 2</label>
+              <div style="display:flex; gap:8px; align-items:center;">
+                <input type="text" id="about-hero-img-2-input" placeholder="images/about-2.svg" style="flex:1;">
+                <button type="button" id="about-hero-img-2-upload-btn" class="btn btn--outline btn--small">📁 Upload</button>
+              </div>
+            </div>
+            <div class="form-group">
+              <label for="about-bio-input">Bio paragraph</label>
+              <textarea id="about-bio-input" rows="5"></textarea>
+            </div>
+
+            <h3>Skills</h3>
+            <div id="about-skills-editor"></div>
+            <button type="button" class="btn btn--outline btn--small mt-2" id="add-skill-btn">+ Add Skill</button>
+
+            <h3 class="mt-4">Pricing Plans</h3>
+            <div id="about-pricing-editor"></div>
+
+            <div class="mt-4">
+              <button type="submit" class="btn btn--accent">Save About Page</button>
+              <div class="form-status" id="about-form-status" role="status" aria-live="polite"></div>
+            </div>
+          </form>
+        </section>
+       
+        <!-- ---------- Social Media Links ---------- -->
+        <section class="section">
+          <h2>Social Media Links</h2>
+          <p style="font-size:var(--fs-small);color:var(--color-text-faint);">Enter your username for each platform. Leave blank to hide it in the sidebar.</p>
+          <form id="social-edit-form">
+            <div class="form-group">
+              <label for="social-instagram">📷 Instagram (username)</label>
+              <input type="text" id="social-instagram" placeholder="yourhandle">
+            </div>
+            <div class="form-group">
+              <label for="social-twitter">🐦 Twitter / X (username)</label>
+              <input type="text" id="social-twitter" placeholder="yourhandle">
+            </div>
+            <div class="form-group">
+              <label for="social-linkedin">💼 LinkedIn (username)</label>
+              <input type="text" id="social-linkedin" placeholder="yourname">
+            </div>
+            <div class="form-group">
+              <label for="social-youtube">▶️ YouTube (handle)</label>
+              <input type="text" id="social-youtube" placeholder="yourchannel">
+            </div>
+            <div class="form-group">
+              <label for="social-whatsapp">💬 WhatsApp (number with country code)</label>
+              <input type="text" id="social-whatsapp" placeholder="2348012345678">
+            </div>
+            <button type="submit" class="btn btn--accent">Save Social Links</button>
+            <div class="form-status" id="social-form-status" role="status" aria-live="polite"></div>
+          </form>
+        </section>
+
+        <!-- ---------- Services ---------- -->
+        <section class="section section--soft">
+          <h2>Services</h2>
+          <div class="admin-toolbar">
+            <p style="margin:0;font-size:var(--fs-small);color:var(--color-text-faint);">These appear in the "What I Do" section on the Portfolio page.</p>
+            <button class="btn btn--accent btn--small" id="add-service-btn" type="button">+ Add Service</button>
+          </div>
+          <div style="overflow-x:auto;margin-top:var(--space-2);">
+            <table class="admin-table">
+              <thead>
+                <tr><th>Icon</th><th>Title</th><th>Description</th><th>Actions</th></tr>
+              </thead>
+              <tbody id="services-table-body">
+                <tr><td colspan="4">Loading…</td></tr>
+              </tbody>
+            </table>
+          </div>
+        </section>
+
+        <!-- ---------- Testimonials ---------- -->
+        <section class="section">
+          <h2>Testimonials</h2>
+          <div class="admin-toolbar">
+            <p style="margin:0;font-size:var(--fs-small);color:var(--color-text-faint);">Client reviews shown on the Portfolio page.</p>
+            <button class="btn btn--accent btn--small" id="add-testimonial-btn" type="button">+ Add Testimonial</button>
+          </div>
+          <div style="overflow-x:auto;margin-top:var(--space-2);">
+            <table class="admin-table">
+              <thead>
+                <tr><th>Name</th><th>Role</th><th>Rating</th><th>Review</th><th>Actions</th></tr>
+              </thead>
+              <tbody id="testimonials-table-body">
+                <tr><td colspan="5">Loading…</td></tr>
+              </tbody>
+            </table>
+          </div>
+        </section>
+        <section class="section section--soft">
+          <h2>Contact Messages</h2>
+          <div style="overflow-x:auto;">
+            <table class="admin-table">
+              <thead>
+                <tr>
+                  <th>Date</th>
+                  <th>Name</th>
+                  <th>Email</th>
+                  <th>Message</th>
+                </tr>
+              </thead>
+              <tbody id="messages-table-body">
+                <tr><td colspan="4">Loading…</td></tr>
+              </tbody>
+            </table>
+          </div>
+        </section>
+      <!-- ---------- Change Password ---------- -->
+        <section class="section">
+          <h2>Change Password</h2>
+          <p style="font-size:var(--fs-small);color:#8888a8;">Update your admin login password.</p>
+          <form id="change-password-form" style="max-width:400px;">
+            <div class="form-group">
+              <label for="current-password">Current Password</label>
+              <input type="password" id="current-password" required autocomplete="current-password">
+            </div>
+            <div class="form-group">
+              <label for="new-password">New Password</label>
+              <input type="password" id="new-password" required minlength="6" autocomplete="new-password">
+            </div>
+            <div class="form-group">
+              <label for="confirm-password">Confirm New Password</label>
+              <input type="password" id="confirm-password" required minlength="6" autocomplete="new-password">
+            </div>
+            <button type="submit" class="btn btn--accent">Update Password</button>
+            <div class="form-status" id="change-password-status" role="status" aria-live="polite"></div>
+          </form>
+        </section>
+
+      </div>
+
+       <!-- ---------- Edit Site Branding, Theme, Categories, Footer ---------- -->
+        <section class="section">
+          <h2>Site Branding &amp; Footer</h2>
+          <form id="site-edit-form">
+            <h3>Branding</h3>
+            <div class="form-group">
+              <label for="site-name-input">Site name (shown in sidebar &amp; mobile bar)</label>
+              <input type="text" id="site-name-input">
+            </div>
+            <div class="form-group">
+              <label for="site-tagline-input">Tagline (under site name in sidebar)</label>
+              <input type="text" id="site-tagline-input">
+            </div>
+            <div class="form-group">
+              <label for="site-avatar-input">Avatar image path or URL</label>
+              <div style="display:flex; gap:8px; align-items:center;">
+                <input type="text" id="site-avatar-input" placeholder="images/avatar.svg" style="flex:1;">
+                <button type="button" id="avatar-upload-btn" class="btn btn--outline btn--small">📁 Upload</button>
+              </div>
+            </div>
+
+            <h3 class="mt-4">Theme</h3>
+            <div class="form-group">
+              <label for="theme-accent-input">Accent color (hex)</label>
+              <input type="color" id="theme-accent-input" style="height:44px; padding:4px; width:120px;">
+            </div>
+
+            <h3 class="mt-4">Portfolio Filter Categories</h3>
+            <p style="font-size: var(--fs-small); color: var(--color-text-faint);">One per line. These become the filter buttons on the Portfolio page (use the same words when setting a portfolio item's category).</p>
+            <div class="form-group">
+              <textarea id="categories-input" rows="3"></textarea>
+            </div>
+
+            <h3 class="mt-4">Footer</h3>
+            <div class="form-group">
+              <label for="footer-text-input">Footer description text</label>
+              <textarea id="footer-text-input" rows="3"></textarea>
+            </div>
+
+            <label>Blog posts (shown in footer)</label>
+            <div id="footer-blog-editor"></div>
+            <button type="button" class="btn btn--outline btn--small mt-2" id="add-blog-post-btn">+ Add Blog Post</button>
+
+            <div class="form-group mt-4">
+              <label for="footer-tags-input">Popular tags (one per line)</label>
+              <textarea id="footer-tags-input" rows="4"></textarea>
+            </div>
+
+            <div class="mt-4">
+              <button type="submit" class="btn btn--accent">Save Branding &amp; Footer</button>
+              <div class="form-status" id="site-form-status" role="status" aria-live="polite"></div>
+            </div>
+          </form>
+        </section>
+
+      </div>
+
+      <footer class="footer">
+        <div class="footer-bottom">
+        <a>FAMOUS GRAPHIX @2026</a>
+        </div>
+      </footer>
+    </main>
+  </div>
+
+
+  <!-- ---------- Add / Edit service modal ---------- -->
+  <div class="modal-backdrop" id="service-modal">
+    <div class="modal">
+      <h2 id="service-modal-title">Add Service</h2>
+      <form id="service-form">
+        <input type="hidden" id="service-id" value="">
+        <div class="form-group">
+          <label for="service-icon">Icon (emoji)</label>
+          <input type="text" id="service-icon" placeholder="📷" maxlength="4">
+        </div>
+        <div class="form-group">
+          <label for="service-title">Title</label>
+          <input type="text" id="service-title" required>
+        </div>
+        <div class="form-group">
+          <label for="service-description">Description</label>
+          <textarea id="service-description" rows="3"></textarea>
+        </div>
+        <div class="modal-actions">
+          <button type="button" class="btn btn--outline" id="service-modal-cancel">Cancel</button>
+          <button type="submit" class="btn btn--accent" id="service-modal-save">Save</button>
+        </div>
+        <div class="form-status" id="service-form-status" role="status" aria-live="polite"></div>
+      </form>
+    </div>
+  </div>
+
+  <!-- ---------- Add / Edit testimonial modal ---------- -->
+  <div class="modal-backdrop" id="testimonial-modal">
+    <div class="modal">
+      <h2 id="testimonial-modal-title">Add Testimonial</h2>
+      <form id="testimonial-form">
+        <input type="hidden" id="testimonial-id" value="">
+        <div class="form-group">
+          <label for="testimonial-name">Client Name</label>
+          <input type="text" id="testimonial-name" required>
+        </div>
+        <div class="form-group">
+          <label for="testimonial-role">Role / Company</label>
+          <input type="text" id="testimonial-role" placeholder="CEO, Company Name">
+        </div>
+        <div class="form-group">
+          <label for="testimonial-rating">Star Rating (1–5)</label>
+          <input type="number" id="testimonial-rating" min="1" max="5" value="5">
+        </div>
+        <div class="form-group">
+          <label for="testimonial-text">Review text</label>
+          <textarea id="testimonial-text" rows="4" required></textarea>
+        </div>
+        <div class="form-group">
+          <label for="testimonial-avatar">Avatar image (optional)</label>
+          <div style="display:flex; gap:8px; align-items:center;">
+            <input type="text" id="testimonial-avatar" placeholder="images/… or https://…" style="flex:1;">
+            <button type="button" id="testimonial-avatar-upload-btn" class="btn btn--outline btn--small">📁 Upload</button>
+          </div>
+        </div>
+        <div class="modal-actions">
+          <button type="button" class="btn btn--outline" id="testimonial-modal-cancel">Cancel</button>
+          <button type="submit" class="btn btn--accent" id="testimonial-modal-save">Save</button>
+        </div>
+        <div class="form-status" id="testimonial-form-status" role="status" aria-live="polite"></div>
+      </form>
+    </div>
+  </div>
+
+  <!-- Firebase CDN -->
+  <script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-app-compat.js"></script>
+  <script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-auth-compat.js"></script>
+  <script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-firestore-compat.js"></script>
+  <script src="js/firebase.js"></script>
+  <script src="js/main.js"></script>
+  <script src="js/admin.js"></script>
+  <script src="js/site-content.js"></script>
+  <script src="js/admin-services-testimonials.js"></script>
+</body>
+</html>

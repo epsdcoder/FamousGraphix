@@ -1,0 +1,91 @@
+/* =========================================================
+   RESPONSIVE.CSS — breakpoints & mobile behavior
+   Updated for fixed sidebar layout
+   ========================================================= */
+
+/* ---------- Tablet (<= 992px): 2-column gallery / pricing ---------- */
+@media (max-width: 992px) {
+  .gallery { grid-template-columns: repeat(2, 1fr); }
+  .pricing { grid-template-columns: repeat(2, 1fr); }
+  .footer-grid { grid-template-columns: 1fr 1fr; }
+  .footer-grid > :last-child { grid-column: 1 / -1; }
+  .contact-grid { grid-template-columns: 1fr; }
+  .testimonials-grid { grid-template-columns: repeat(2, 1fr); }
+}
+
+/* ---------- Small tablet / large phone (<= 768px) ---------- */
+@media (max-width: 768px) {
+  :root { --sidebar-width: 260px; }
+
+  /* Show topbar on mobile */
+  .topbar { display: flex; }
+
+  /* Override fixed sidebar to be off-canvas drawer on mobile */
+  .app-shell { padding-left: 0; }
+
+  .sidebar {
+    position: fixed;
+    top: 0;
+    left: 0;
+    height: 100vh;
+    z-index: 100;
+    transform: translateX(-100%);
+    transition: transform 0.3s ease;
+    box-shadow: 4px 0 24px rgba(0,0,0,0.5);
+  }
+
+  .sidebar.is-open {
+    transform: translateX(0);
+  }
+
+  .sidebar-overlay {
+    display: none;
+    position: fixed;
+    inset: 0;
+    background: rgba(0,0,0,0.6);
+    z-index: 90;
+    backdrop-filter: blur(2px);
+  }
+
+  .sidebar-overlay.is-open { display: block; }
+
+  .about-hero { grid-template-columns: 1fr; }
+  .pricing { grid-template-columns: 1fr; }
+  .footer-grid { grid-template-columns: 1fr; }
+  .testimonials-grid { grid-template-columns: 1fr; }
+
+  .page-header { padding: var(--space-3); }
+  .section { padding: var(--space-3); }
+
+  .lightbox__prev { left: -8px; }
+  .lightbox__next { right: -8px; }
+}
+
+/* ---------- Phone (<= 600px) ---------- */
+@media (max-width: 600px) {
+  .gallery { grid-template-columns: 1fr; }
+  h1 { font-size: 1.6rem; }
+  .filters__label { width: 100%; margin-bottom: 6px; }
+  .filter-btn { flex: 1; }
+  .admin-table { display: block; overflow-x: auto; white-space: nowrap; }
+  .lightbox { padding: var(--space-2); }
+  .lightbox__nav { display: none; }
+}
+
+/* ---------- Desktop: ensure sidebar is always visible ---------- */
+@media (min-width: 769px) {
+  .topbar { display: none !important; }
+  .sidebar {
+    transform: none !important;
+    position: fixed;
+  }
+  .app-shell {
+    padding-left: var(--sidebar-width);
+  }
+}
+
+/* ---------- Print ---------- */
+@media print {
+  .topbar, .sidebar, .footer, .filters, .admin-toolbar { display: none !important; }
+  .app-shell { padding-left: 0; }
+}
