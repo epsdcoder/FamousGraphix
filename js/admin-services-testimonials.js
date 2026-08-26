@@ -56,7 +56,7 @@ async function loadServicesTable() {
   tbody.innerHTML = '<tr><td colspan="4">Loading…</td></tr>';
 
   try {
-    const res = await fetch('/api/services');
+    const res = await fetch(API_BASE + '/api/services');
     currentServices = await res.json();
 
     if (!currentServices.length) {
@@ -129,7 +129,7 @@ async function handleSaveService(e) {
   saveBtn.textContent = 'Saving…';
 
   try {
-    const url = id ? `/api/services/${id}` : '/api/services';
+    const url = id ? API_BASE + `/api/services/${id}` : API_BASE + '/api/services';
     const method = id ? 'PUT' : 'POST';
     const res = await authFetch(url, {
       method,
@@ -152,7 +152,7 @@ async function handleSaveService(e) {
 async function handleDeleteService(id) {
   if (!confirm('Delete this service? This cannot be undone.')) return;
   try {
-    const res = await authFetch(`/api/services/${id}`, { method: 'DELETE' });
+    const res = await authFetch(API_BASE + `/api/services/${id}`, { method: 'DELETE' });
     if (!res.ok && res.status !== 204) throw new Error('Could not delete service.');
     loadServicesTable();
   } catch (err) {
@@ -169,7 +169,7 @@ async function loadTestimonialsTable() {
   tbody.innerHTML = '<tr><td colspan="5">Loading…</td></tr>';
 
   try {
-    const res = await fetch('/api/testimonials');
+    const res = await fetch(API_BASE + '/api/testimonials');
     currentTestimonials = await res.json();
 
     if (!currentTestimonials.length) {
@@ -248,7 +248,7 @@ async function handleSaveTestimonial(e) {
   saveBtn.textContent = 'Saving…';
 
   try {
-    const url = id ? `/api/testimonials/${id}` : '/api/testimonials';
+    const url = id ? API_BASE + `/api/testimonials/${id}` : API_BASE + '/api/testimonials';
     const method = id ? 'PUT' : 'POST';
     const res = await authFetch(url, {
       method,
@@ -271,7 +271,7 @@ async function handleSaveTestimonial(e) {
 async function handleDeleteTestimonial(id) {
   if (!confirm('Delete this testimonial? This cannot be undone.')) return;
   try {
-    const res = await authFetch(`/api/testimonials/${id}`, { method: 'DELETE' });
+    const res = await authFetch(API_BASE + `/api/testimonials/${id}`, { method: 'DELETE' });
     if (!res.ok && res.status !== 204) throw new Error('Could not delete testimonial.');
     loadTestimonialsTable();
   } catch (err) {

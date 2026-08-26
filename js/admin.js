@@ -132,7 +132,7 @@ async function loadPortfolioItems() {
   var tbody = document.getElementById('admin-table-body');
   tbody.innerHTML = '<tr><td colspan="5">Loading...</td></tr>';
   try {
-    var res = await fetch('/api/portfolio');
+    var res = await fetch(API_BASE + API_BASE + '/api/portfolio');
     currentItems = await res.json();
     if (!currentItems.length) {
       tbody.innerHTML = '<tr><td colspan="5">No items yet. Click "+ Add Item".</td></tr>';
@@ -209,7 +209,7 @@ async function handleSaveItem(e) {
   saveBtn.disabled = true;
   saveBtn.textContent = 'Saving...';
   try {
-    var url = id ? '/api/portfolio/' + id : '/api/portfolio';
+    var url = id ? API_BASE + '/api/portfolio/' + id : API_BASE + '/api/portfolio';
     var method = id ? 'PUT' : 'POST';
     var res = await authFetch(url, { method: method, headers: { 'Content-Type': 'application/json' }, body: JSON.stringify(payload) });
     var data = await res.json();
@@ -228,7 +228,7 @@ async function handleSaveItem(e) {
 async function handleDeleteItem(id) {
   if (!confirm('Delete this item? Cannot be undone.')) return;
   try {
-    var res = await authFetch('/api/portfolio/' + id, { method: 'DELETE' });
+    var res = await authFetch(API_BASE + API_BASE + '/api/portfolio/' + id, { method: 'DELETE' });
     if (!res.ok && res.status !== 204) throw new Error('Could not delete.');
     loadPortfolioItems();
   } catch (err) { alert(err.message); }
@@ -238,7 +238,7 @@ async function loadMessages() {
   var tbody = document.getElementById('messages-table-body');
   tbody.innerHTML = '<tr><td colspan="4">Loading...</td></tr>';
   try {
-    var res = await authFetch('/api/messages');
+    var res = await authFetch(API_BASE + '/api/messages');
     var messages = await res.json();
     if (!messages.length) { tbody.innerHTML = '<tr><td colspan="4">No messages yet.</td></tr>'; return; }
     tbody.innerHTML = messages.map(function(m) {
@@ -251,7 +251,7 @@ async function loadMessages() {
 
 async function loadSiteContentIntoForms() {
   try {
-    var res = await fetch('/api/content');
+    var res = await fetch(API_BASE + '/api/content');
     var content = await res.json();
     if (content.about) {
       currentAboutData = content.about;
@@ -366,7 +366,7 @@ async function handleSaveAbout(e) {
     heroImage2: img2 ? img2.value.trim() : ''
   })};
   try {
-    var res = await authFetch('/api/content', { method: 'PUT', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify(payload) });
+    var res = await authFetch(API_BASE + '/api/content', { method: 'PUT', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify(payload) });
     var data = await res.json();
     if (!res.ok) throw new Error(data.error || 'Could not save.');
     currentAboutData = data.about;
@@ -386,7 +386,7 @@ async function handleSaveContact(e) {
     whatsappNumber: document.getElementById('contact-whatsapp-input').value.trim()
   }};
   try {
-    var res = await authFetch('/api/content', { method: 'PUT', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify(payload) });
+    var res = await authFetch(API_BASE + '/api/content', { method: 'PUT', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify(payload) });
     var data = await res.json();
     if (!res.ok) throw new Error(data.error || 'Could not save.');
     status.textContent = 'Contact page saved!'; status.className = 'form-status is-success';
@@ -440,7 +440,7 @@ async function handleSaveSocial(e) {
     }
   }};
   try {
-    var res = await authFetch('/api/content', { method: 'PUT', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify(payload) });
+    var res = await authFetch(API_BASE + '/api/content', { method: 'PUT', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify(payload) });
     var data = await res.json();
     if (!res.ok) throw new Error(data.error || 'Could not save.');
     status.textContent = 'Social links saved!'; status.className = 'form-status is-success';
@@ -460,7 +460,7 @@ async function handleSaveSite(e) {
     footer: { text: document.getElementById('footer-text-input').value.trim(), blogPosts: collectBlogPostsFromEditor(), tags: tags }
   };
   try {
-    var res = await authFetch('/api/content', { method: 'PUT', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify(payload) });
+    var res = await authFetch(API_BASE + '/api/content', { method: 'PUT', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify(payload) });
     var data = await res.json();
     if (!res.ok) throw new Error(data.error || 'Could not save.');
     status.textContent = 'Saved! Refresh any page to see changes.'; status.className = 'form-status is-success';
@@ -480,7 +480,7 @@ function attachUploadButton(inputEl, buttonEl) {
       try {
         var formData = new FormData();
         formData.append('image', file);
-        var res = await authFetch('/api/upload', { method: 'POST', body: formData });
+        var res = await authFetch(API_BASE + '/api/upload', { method: 'POST', body: formData });
         var data = await res.json();
         if (!res.ok) throw new Error(data.error || 'Upload failed.');
         inputEl.value = data.path;

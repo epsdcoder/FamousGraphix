@@ -22,7 +22,7 @@ async function loadPortfolio() {
 
   let items;
   try {
-    const res = await fetch('/api/portfolio');
+    const res = await fetch(API_BASE + '/api/portfolio');
     if (!res.ok) throw new Error('Bad response from server');
     items = await res.json();
   } catch (err) {

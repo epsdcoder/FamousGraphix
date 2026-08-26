@@ -15,7 +15,7 @@ document.addEventListener('DOMContentLoaded', loadSiteContent);
 async function loadSiteContent() {
   let content;
   try {
-    const res = await fetch('/api/content');
+    const res = await fetch(API_BASE + '/api/content');
     if (!res.ok) throw new Error('Bad response from server');
     content = await res.json();
   } catch (err) {

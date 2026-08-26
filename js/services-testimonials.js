@@ -15,7 +15,7 @@ async function loadServices() {
   if (!container) return;
 
   try {
-    const res = await fetch('/api/services');
+    const res = await fetch(API_BASE + '/api/services');
     if (!res.ok) throw new Error('Could not load services');
     const services = await res.json();
     renderServices(container, services);
@@ -45,7 +45,7 @@ async function loadTestimonials() {
   if (!container) return;
 
   try {
-    const res = await fetch('/api/testimonials');
+    const res = await fetch(API_BASE + '/api/testimonials');
     if (!res.ok) throw new Error('Could not load testimonials');
     const testimonials = await res.json();
     renderTestimonials(container, testimonials);

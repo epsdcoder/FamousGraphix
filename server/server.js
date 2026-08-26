@@ -57,6 +57,20 @@ async function requireAuth(req, res, next) {
 }
 
 app.use(express.json());
+
+// CORS — allow Vercel frontend to talk to this Render backend
+app.use(function(req, res, next) {
+  var allowed = ['https://famous-graphix.vercel.app', 'http://localhost:3000'];
+  var origin = req.headers.origin;
+  if (allowed.includes(origin)) {
+    res.header('Access-Control-Allow-Origin', origin);
+  }
+  res.header('Access-Control-Allow-Methods', 'GET,POST,PUT,DELETE,OPTIONS');
+  res.header('Access-Control-Allow-Headers', 'Content-Type,Authorization');
+  if (req.method === 'OPTIONS') return res.status(200).end();
+  next();
+});
+
 app.use(express.static(path.join(__dirname, '..')));
 
 /* ---------------------------------------------------------
