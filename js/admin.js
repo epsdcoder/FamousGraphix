@@ -132,7 +132,7 @@ async function loadPortfolioItems() {
   var tbody = document.getElementById('admin-table-body');
   tbody.innerHTML = '<tr><td colspan="5">Loading...</td></tr>';
   try {
-    var res = await fetch(API_BASE + API_BASE + '/api/portfolio');
+    var res = await fetch(API_BASE + '/api/portfolio');
     currentItems = await res.json();
     if (!currentItems.length) {
       tbody.innerHTML = '<tr><td colspan="5">No items yet. Click "+ Add Item".</td></tr>';
@@ -228,7 +228,7 @@ async function handleSaveItem(e) {
 async function handleDeleteItem(id) {
   if (!confirm('Delete this item? Cannot be undone.')) return;
   try {
-    var res = await authFetch(API_BASE + API_BASE + '/api/portfolio/' + id, { method: 'DELETE' });
+    var res = await authFetch(API_BASE + '/api/portfolio/' + id, { method: 'DELETE' });
     if (!res.ok && res.status !== 204) throw new Error('Could not delete.');
     loadPortfolioItems();
   } catch (err) { alert(err.message); }
