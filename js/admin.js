@@ -2,8 +2,30 @@
    ADMIN.JS — Firebase Auth version
    ========================================================= */
 
+/* ---------------------------------------------------------
+   Cloudinary — free image hosting (no credit card required).
+   Replace these two values with your own after creating a
+   free account at https://cloudinary.com and an UNSIGNED
+   upload preset in Settings > Upload > Upload presets.
+   --------------------------------------------------------- */
 var CLOUDINARY_CLOUD_NAME = 'cia2gvqg';
 var CLOUDINARY_UPLOAD_PRESET = 'zvyzkjhj';
+
+async function uploadImageToCloudinary(file) {
+  if (CLOUDINARY_CLOUD_NAME === 'YOUR_CLOUD_NAME' || CLOUDINARY_UPLOAD_PRESET === 'YOUR_UPLOAD_PRESET') {
+    throw new Error('Cloudinary is not set up yet. Fill in CLOUDINARY_CLOUD_NAME and CLOUDINARY_UPLOAD_PRESET in js/admin.js.');
+  }
+  var formData = new FormData();
+  formData.append('file', file);
+  formData.append('upload_preset', CLOUDINARY_UPLOAD_PRESET);
+  var res = await fetch('https://api.cloudinary.com/v1_1/' + CLOUDINARY_CLOUD_NAME + '/image/upload', {
+    method: 'POST',
+    body: formData
+  });
+  var data = await res.json();
+  if (!res.ok) throw new Error(data.error && data.error.message ? data.error.message : 'Upload failed.');
+  return data.secure_url;
+}
 
 var currentItems = [];
 var currentAboutData = null;
@@ -492,7 +514,7 @@ function attachUploadButton(inputEl, buttonEl) {
       var originalText = buttonEl.textContent;
       buttonEl.textContent = 'Uploading...'; buttonEl.disabled = true;
       try {
-        var downloadURL = await uploadImageToStorage(file);
+        var downloadURL = await uploadImageToCloudinary(file);
         inputEl.value = downloadURL;
         inputEl.dispatchEvent(new Event('input'));
       } catch (err) { alert('Upload failed: ' + err.message); }

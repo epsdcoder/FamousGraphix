@@ -17,22 +17,6 @@ if (!firebase.apps.length) {
 
 const auth = firebase.auth();
 const db = firebase.firestore();
-const storage = firebase.storage();
-
-/* ---------------------------------------------------------
-   Upload a file to Firebase Storage and return its public
-   download URL. This URL works the same on Render, Vercel,
-   or anywhere else — no more local-disk-only image paths.
-   --------------------------------------------------------- */
-async function uploadImageToStorage(file) {
-  if (!auth.currentUser) throw new Error('Not logged in.');
-  var ext = (file.name.split('.').pop() || 'jpg').toLowerCase();
-  var safeExt = /^[a-z0-9]+$/.test(ext) ? ext : 'jpg';
-  var filename = 'uploads/' + Date.now() + '-' + Math.round(Math.random() * 1e6) + '.' + safeExt;
-  var ref = storage.ref().child(filename);
-  var snapshot = await ref.put(file);
-  return await snapshot.ref.getDownloadURL();
-}
 
 async function firebaseLogin(email, password) {
   return await auth.signInWithEmailAndPassword(email, password);
