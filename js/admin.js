@@ -35,6 +35,7 @@ function initDashboard() {
   var aboutForm = document.getElementById('about-edit-form');
   var contactForm = document.getElementById('contact-edit-form');
   var addSkillBtn = document.getElementById('add-skill-btn');
+  var addPricingBtn = document.getElementById('add-pricing-btn');
   var siteForm = document.getElementById('site-edit-form');
   var addBlogPostBtn = document.getElementById('add-blog-post-btn');
   var socialForm = document.getElementById('social-edit-form');
@@ -47,6 +48,7 @@ function initDashboard() {
   if (aboutForm) aboutForm.addEventListener('submit', handleSaveAbout);
   if (contactForm) contactForm.addEventListener('submit', handleSaveContact);
   if (addSkillBtn) addSkillBtn.addEventListener('click', function() { addSkillRow({ name: '', percent: 80 }); });
+  if (addPricingBtn) addPricingBtn.addEventListener('click', function() { addPricingCard({ name: '', price: 0, features: [], featured: false }); });
   if (siteForm) siteForm.addEventListener('submit', handleSaveSite);
   if (addBlogPostBtn) addBlogPostBtn.addEventListener('click', function() { addBlogPostRow({ title: '', subtitle: '', image: '' }); });
   if (socialForm) socialForm.addEventListener('submit', handleSaveSocial);
@@ -330,13 +332,22 @@ function collectSkillsFromEditor() {
 
 function renderPricingEditor(plans) {
   var container = document.getElementById('about-pricing-editor');
-  container.innerHTML = plans.map(function(plan, idx) {
-    return '<div class="pricing-editor-card" data-plan-index="' + idx + '">' +
-      '<label>Plan name</label><input type="text" class="plan-name-input" value="' + escapeHTML(plan.name || '') + '">' +
-      '<label>Monthly price ($)</label><input type="number" class="plan-price-input" min="0" value="' + (plan.price || 0) + '">' +
-      '<label>Features (one per line)</label><textarea class="plan-features-input" rows="4">' + escapeHTML((plan.features || []).join('\n')) + '</textarea>' +
-      '<label class="featured-check"><input type="checkbox" class="plan-featured-input" ' + (plan.featured ? 'checked' : '') + '> Highlight this plan</label></div>';
-  }).join('');
+  container.innerHTML = '';
+  plans.forEach(function(plan) { addPricingCard(plan); });
+}
+
+function addPricingCard(plan) {
+  var container = document.getElementById('about-pricing-editor');
+  var card = document.createElement('div');
+  card.className = 'pricing-editor-card';
+  card.innerHTML =
+    '<label>Plan name</label><input type="text" class="plan-name-input" value="' + escapeHTML(plan.name || '') + '">' +
+    '<label>Monthly price ($)</label><input type="number" class="plan-price-input" min="0" value="' + (plan.price || 0) + '">' +
+    '<label>Features (one per line)</label><textarea class="plan-features-input" rows="4">' + escapeHTML((plan.features || []).join('\n')) + '</textarea>' +
+    '<label class="featured-check"><input type="checkbox" class="plan-featured-input" ' + (plan.featured ? 'checked' : '') + '> Highlight this plan</label>' +
+    '<button type="button" class="remove-row-btn">Remove Package</button>';
+  card.querySelector('.remove-row-btn').addEventListener('click', function() { card.remove(); });
+  container.appendChild(card);
 }
 
 function collectPricingFromEditor() {
@@ -478,12 +489,8 @@ function attachUploadButton(inputEl, buttonEl) {
       var originalText = buttonEl.textContent;
       buttonEl.textContent = 'Uploading...'; buttonEl.disabled = true;
       try {
-        var formData = new FormData();
-        formData.append('image', file);
-        var res = await authFetch(API_BASE + '/api/upload', { method: 'POST', body: formData });
-        var data = await res.json();
-        if (!res.ok) throw new Error(data.error || 'Upload failed.');
-        inputEl.value = data.path;
+        var downloadURL = await uploadImageToStorage(file);
+        inputEl.value = downloadURL;
         inputEl.dispatchEvent(new Event('input'));
       } catch (err) { alert('Upload failed: ' + err.message); }
       finally { buttonEl.textContent = originalText; buttonEl.disabled = false; document.body.removeChild(fileInput); }
