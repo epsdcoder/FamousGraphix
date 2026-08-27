@@ -2,6 +2,9 @@
    ADMIN.JS — Firebase Auth version
    ========================================================= */
 
+var CLOUDINARY_CLOUD_NAME = 'cia2gvqg';
+var CLOUDINARY_UPLOAD_PRESET = 'zvyzkjhj';
+
 var currentItems = [];
 var currentAboutData = null;
 
