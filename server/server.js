@@ -7,7 +7,8 @@ const path = require('path');
 const fs = require('fs/promises');
 const crypto = require('crypto');
 const multer = require('multer');
-const admin = require('firebase-admin');
+const { initializeApp, cert } = require('firebase-admin/app');
+const { getFirestore } = require('firebase-admin/firestore');
 
 const app = express();
 const PORT = process.env.PORT || 3000;
@@ -40,10 +41,10 @@ function loadServiceAccount() {
   return require('../serviceAccountKey.json');
 }
 
-admin.initializeApp({
-  credential: admin.credential.cert(loadServiceAccount())
+const firebaseApp = initializeApp({
+  credential: cert(loadServiceAccount())
 });
-const db = admin.firestore();
+const db = getFirestore(firebaseApp);
 
 /* ---------------------------------------------------------
    Firestore helpers
