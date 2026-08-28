@@ -310,7 +310,8 @@ app.post('/api/contact', async (req, res) => {
       name: name.trim(),
       email: email.trim(),
       message: message.trim(),
-      receivedAt: new Date().toISOString()
+      receivedAt: new Date().toISOString(),
+      read: false
     });
     await writeJSON(MESSAGES_FILE, messages);
     res.status(201).json({ ok: true, message: 'Thanks! Your message has been sent.' });
@@ -320,6 +321,28 @@ app.post('/api/contact', async (req, res) => {
 app.get('/api/messages', requireAuth, async (req, res) => {
   try { res.json(await readJSON(MESSAGES_FILE)); }
   catch (err) { res.status(500).json({ error: 'Could not read messages.' }); }
+});
+
+app.patch('/api/messages/:id', requireAuth, async (req, res) => {
+  try {
+    const messages = await readJSON(MESSAGES_FILE);
+    const idx = messages.findIndex(m => m.id === req.params.id);
+    if (idx === -1) return res.status(404).json({ error: 'Message not found.' });
+    if (req.body.read !== undefined) messages[idx].read = !!req.body.read;
+    await writeJSON(MESSAGES_FILE, messages);
+    res.json(messages[idx]);
+  } catch (err) { res.status(500).json({ error: 'Could not update message.' }); }
+});
+
+app.delete('/api/messages/:id', requireAuth, async (req, res) => {
+  try {
+    const messages = await readJSON(MESSAGES_FILE);
+    const next = messages.filter(m => m.id !== req.params.id);
+    if (next.length === messages.length)
+      return res.status(404).json({ error: 'Message not found.' });
+    await writeJSON(MESSAGES_FILE, next);
+    res.status(204).end();
+  } catch (err) { res.status(500).json({ error: 'Could not delete message.' }); }
 });
 
 /* ---------------------------------------------------------

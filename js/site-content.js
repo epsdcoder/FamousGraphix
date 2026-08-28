@@ -68,15 +68,26 @@ function fillFooter(footer) {
 
   const blogContainer = document.getElementById('footer-blog-posts');
   if (blogContainer && Array.isArray(footer.blogPosts)) {
-    blogContainer.innerHTML = footer.blogPosts.map(post => `
-      <div class="blog-post">
-        <img src="${escapeHTML(post.image)}" alt="">
+    blogContainer.innerHTML = footer.blogPosts.map(post => {
+      const link = (post.link || '').trim();
+      let icon = (post.image || '').trim();
+      if (!icon && link) {
+        try {
+          const host = new URL(link).hostname;
+          icon = `https://www.google.com/s2/favicons?domain=${host}&sz=64`;
+        } catch (e) { /* invalid URL, leave icon blank */ }
+      }
+      const inner = `
+        ${icon ? `<img src="${escapeHTML(icon)}" alt="">` : ''}
         <div class="blog-post__meta">
           <strong>${escapeHTML(post.title)}</strong>
           <span>${escapeHTML(post.subtitle)}</span>
         </div>
-      </div>
-    `).join('');
+      `;
+      return link
+        ? `<a class="blog-post" href="${escapeHTML(link)}" target="_blank" rel="noopener">${inner}</a>`
+        : `<div class="blog-post">${inner}</div>`;
+    }).join('');
   }
 
   const tagsContainer = document.getElementById('footer-tags');

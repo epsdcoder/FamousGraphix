@@ -8,8 +8,8 @@
    free account at https://cloudinary.com and an UNSIGNED
    upload preset in Settings > Upload > Upload presets.
    --------------------------------------------------------- */
-var CLOUDINARY_CLOUD_NAME = 'cia2gvqg';
-var CLOUDINARY_UPLOAD_PRESET = 'zvyzkjhj';
+var CLOUDINARY_CLOUD_NAME = 'YOUR_CLOUD_NAME';
+var CLOUDINARY_UPLOAD_PRESET = 'YOUR_UPLOAD_PRESET';
 
 async function uploadImageToCloudinary(file) {
   if (CLOUDINARY_CLOUD_NAME === 'YOUR_CLOUD_NAME' || CLOUDINARY_UPLOAD_PRESET === 'YOUR_UPLOAD_PRESET') {
@@ -28,6 +28,7 @@ async function uploadImageToCloudinary(file) {
 }
 
 var currentItems = [];
+var currentCategories = ['design', 'photos', 'art'];
 var currentAboutData = null;
 
 document.addEventListener('DOMContentLoaded', function() {
@@ -187,6 +188,16 @@ async function loadPortfolioItems() {
   }
 }
 
+function populateItemCategoryOptions(selected) {
+  var select = document.getElementById('item-category');
+  if (!select) return;
+  var prev = selected !== undefined ? selected : select.value;
+  select.innerHTML = currentCategories.map(function(c) {
+    return '<option value="' + escapeHTML(c) + '">' + escapeHTML(c.charAt(0).toUpperCase() + c.slice(1)) + '</option>';
+  }).join('');
+  if (prev && currentCategories.indexOf(prev) !== -1) select.value = prev;
+}
+
 function openModal(itemId) {
   var modal = document.getElementById('item-modal');
   var title = document.getElementById('modal-title');
@@ -195,6 +206,7 @@ function openModal(itemId) {
   status.textContent = '';
   status.className = 'form-status';
   form.reset();
+  populateItemCategoryOptions();
 
   if (itemId) {
     var item = currentItems.find(function(i) { return i.id === itemId; });
@@ -202,7 +214,7 @@ function openModal(itemId) {
     title.textContent = 'Edit Portfolio Item';
     document.getElementById('item-id').value = item.id;
     document.getElementById('item-title').value = item.title;
-    document.getElementById('item-category').value = item.category;
+    populateItemCategoryOptions(item.category);
     document.getElementById('item-image').value = item.image;
     document.getElementById('item-description').value = item.description || '';
   } else {
@@ -263,17 +275,54 @@ async function handleDeleteItem(id) {
 
 async function loadMessages() {
   var tbody = document.getElementById('messages-table-body');
-  tbody.innerHTML = '<tr><td colspan="4">Loading...</td></tr>';
+  tbody.innerHTML = '<tr><td colspan="6">Loading...</td></tr>';
   try {
     var res = await authFetch(API_BASE + '/api/messages');
     var messages = await res.json();
-    if (!messages.length) { tbody.innerHTML = '<tr><td colspan="4">No messages yet.</td></tr>'; return; }
+    if (!messages.length) { tbody.innerHTML = '<tr><td colspan="6">No messages yet.</td></tr>'; return; }
     tbody.innerHTML = messages.map(function(m) {
-      return '<tr><td>' + new Date(m.receivedAt).toLocaleString() + '</td><td>' + escapeHTML(m.name) + '</td><td>' + escapeHTML(m.email) + '</td><td>' + escapeHTML(m.message) + '</td></tr>';
+      var isRead = !!m.read;
+      return '<tr' + (isRead ? '' : ' style="font-weight:600;"') + '>' +
+        '<td>' + new Date(m.receivedAt).toLocaleString() + '</td>' +
+        '<td>' + escapeHTML(m.name) + '</td>' +
+        '<td>' + escapeHTML(m.email) + '</td>' +
+        '<td>' + escapeHTML(m.message) + '</td>' +
+        '<td>' + (isRead ? '<span class="badge">Read</span>' : '<span class="badge badge--unread">Unread</span>') + '</td>' +
+        '<td style="white-space:nowrap;">' +
+          '<button type="button" class="btn btn--outline btn--small mark-read-btn" data-id="' + m.id + '" data-read="' + (isRead ? '0' : '1') + '">' + (isRead ? 'Mark Unread' : 'Mark Read') + '</button> ' +
+          '<button type="button" class="btn btn--outline btn--small delete-message-btn" data-id="' + m.id + '">Delete</button>' +
+        '</td></tr>';
     }).join('');
+    tbody.querySelectorAll('.mark-read-btn').forEach(function(btn) {
+      btn.addEventListener('click', function() { handleToggleMessageRead(btn.dataset.id, btn.dataset.read === '1'); });
+    });
+    tbody.querySelectorAll('.delete-message-btn').forEach(function(btn) {
+      btn.addEventListener('click', function() { handleDeleteMessage(btn.dataset.id); });
+    });
   } catch (err) {
-    tbody.innerHTML = '<tr><td colspan="4">Could not load messages.</td></tr>';
+    tbody.innerHTML = '<tr><td colspan="6">Could not load messages.</td></tr>';
   }
+}
+
+async function handleToggleMessageRead(id, read) {
+  try {
+    var res = await authFetch(API_BASE + '/api/messages/' + id, {
+      method: 'PATCH',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ read: read })
+    });
+    if (!res.ok) throw new Error('Could not update message.');
+    loadMessages();
+  } catch (err) { alert(err.message); }
+}
+
+async function handleDeleteMessage(id) {
+  if (!confirm('Delete this message? Cannot be undone.')) return;
+  try {
+    var res = await authFetch(API_BASE + '/api/messages/' + id, { method: 'DELETE' });
+    if (!res.ok && res.status !== 204) throw new Error('Could not delete message.');
+    loadMessages();
+  } catch (err) { alert(err.message); }
 }
 
 async function loadSiteContentIntoForms() {
@@ -318,7 +367,11 @@ async function loadSiteContentIntoForms() {
       if (avatarInput && avatarUploadBtn) attachUploadButton(avatarInput, avatarUploadBtn);
     }
     if (content.theme) document.getElementById('theme-accent-input').value = content.theme.accentColor || '#4db6ac';
-    if (content.categories) document.getElementById('categories-input').value = content.categories.join('\n');
+    if (content.categories) {
+      currentCategories = content.categories;
+      document.getElementById('categories-input').value = content.categories.join('\n');
+      populateItemCategoryOptions();
+    }
     if (content.footer) {
       document.getElementById('footer-text-input').value = content.footer.text || '';
       document.getElementById('footer-tags-input').value = (content.footer.tags || []).join('\n');
@@ -441,7 +494,8 @@ function addBlogPostRow(post) {
   row.className = 'blog-editor-row';
   row.innerHTML = '<input type="text" class="blog-title-input" placeholder="Title" value="' + escapeHTML(post.title || '') + '">' +
     '<input type="text" class="blog-subtitle-input" placeholder="Subtitle" value="' + escapeHTML(post.subtitle || '') + '">' +
-    '<input type="text" class="blog-image-input" placeholder="Image path/URL" value="' + escapeHTML(post.image || '') + '">' +
+    '<input type="url" class="blog-link-input" placeholder="Link URL (https://...)" value="' + escapeHTML(post.link || '') + '">' +
+    '<input type="text" class="blog-image-input" placeholder="Icon (auto from link if blank)" value="' + escapeHTML(post.image || '') + '">' +
     '<button type="button" class="remove-row-btn">Remove</button>';
   row.querySelector('.remove-row-btn').addEventListener('click', function() { row.remove(); });
   container.appendChild(row);
@@ -453,8 +507,9 @@ function collectBlogPostsFromEditor() {
   rows.forEach(function(row) {
     var title = row.querySelector('.blog-title-input').value.trim();
     var subtitle = row.querySelector('.blog-subtitle-input').value.trim();
+    var link = row.querySelector('.blog-link-input').value.trim();
     var image = row.querySelector('.blog-image-input').value.trim();
-    if (title) posts.push({ title: title, subtitle: subtitle, image: image });
+    if (title) posts.push({ title: title, subtitle: subtitle, link: link, image: image });
   });
   return posts;
 }
