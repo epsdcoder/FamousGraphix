@@ -1,5 +1,5 @@
 /* =========================================================
-   SERVER.JS — Portfolio Site Backend (Firebase Auth version)
+   SERVER.JS — Portfolio Site Backend (Firebase Auth + Firestore)
    ========================================================= */
 
 const express = require('express');
@@ -7,6 +7,7 @@ const path = require('path');
 const fs = require('fs/promises');
 const crypto = require('crypto');
 const multer = require('multer');
+const admin = require('firebase-admin');
 
 const app = express();
 const PORT = process.env.PORT || 3000;
@@ -19,29 +20,124 @@ const TESTIMONIALS_FILE = path.join(DATA_DIR, 'testimonials.json');
 const SERVICES_FILE     = path.join(DATA_DIR, 'services.json');
 
 /* ---------------------------------------------------------
-   Firebase Admin — verify ID tokens from the client
+   Firebase Admin — Firestore is now the permanent data store.
+   Local JSON files under /data are ONLY used once, to seed
+   Firestore the first time this runs (so existing content
+   isn't lost during the migration). After that, Firestore
+   is the single source of truth and survives restarts/deploys.
+
+   Credentials: set an environment variable on Render called
+   FIREBASE_SERVICE_ACCOUNT containing the full contents of
+   your service account JSON key (as one line). Locally, it
+   falls back to reading serviceAccountKey.json from disk.
    --------------------------------------------------------- */
 const FIREBASE_PROJECT_ID = 'portfolio-site-9399d';
 
+function loadServiceAccount() {
+  if (process.env.FIREBASE_SERVICE_ACCOUNT) {
+    return JSON.parse(process.env.FIREBASE_SERVICE_ACCOUNT);
+  }
+  return require('../serviceAccountKey.json');
+}
+
+admin.initializeApp({
+  credential: admin.credential.cert(loadServiceAccount())
+});
+const db = admin.firestore();
+
+/* ---------------------------------------------------------
+   Firestore helpers
+   --------------------------------------------------------- */
+async function getAll(collectionName, orderField, direction) {
+  const snap = await db.collection(collectionName).get();
+  const docs = snap.docs.map(d => d.data());
+  docs.sort((a, b) => {
+    const av = a[orderField], bv = b[orderField];
+    if (av === bv) return 0;
+    return direction === 'asc' ? (av > bv ? 1 : -1) : (av < bv ? 1 : -1);
+  });
+  return docs;
+}
+
+async function setDoc(collectionName, id, data) {
+  await db.collection(collectionName).doc(id).set(data);
+}
+
+async function updateDoc(collectionName, id, patch) {
+  await db.collection(collectionName).doc(id).update(patch);
+}
+
+async function deleteDoc(collectionName, id) {
+  await db.collection(collectionName).doc(id).delete();
+}
+
+async function getContentDoc() {
+  const doc = await db.collection('siteContent').doc('main').get();
+  return doc.exists ? doc.data() : {};
+}
+
+async function setContentDoc(data) {
+  await db.collection('siteContent').doc('main').set(data, { merge: true });
+}
+
+/* ---------------------------------------------------------
+   One-time seed — if a Firestore collection is empty, fill
+   it from the matching local JSON file (existing project
+   data), so migrating to Firestore doesn't lose anything.
+   Safe to leave in permanently: it only ever acts on empty
+   collections, so it's a no-op after the first run.
+   --------------------------------------------------------- */
+async function seedIfEmpty(collectionName, filePath) {
+  const snap = await db.collection(collectionName).limit(1).get();
+  if (!snap.empty) return;
+  try {
+    const raw = await fs.readFile(filePath, 'utf-8');
+    const items = JSON.parse(raw);
+    const batch = db.batch();
+    items.forEach(item => {
+      const id = item.id || crypto.randomUUID();
+      batch.set(db.collection(collectionName).doc(id), { ...item, id });
+    });
+    await batch.commit();
+    console.log(`Seeded Firestore collection "${collectionName}" with ${items.length} item(s).`);
+  } catch (err) {
+    console.log(`Skipped seeding "${collectionName}":`, err.message);
+  }
+}
+
+async function seedContentIfEmpty() {
+  const doc = await db.collection('siteContent').doc('main').get();
+  if (doc.exists) return;
+  try {
+    const raw = await fs.readFile(CONTENT_FILE, 'utf-8');
+    await db.collection('siteContent').doc('main').set(JSON.parse(raw));
+    console.log('Seeded Firestore site content.');
+  } catch (err) {
+    console.log('Skipped seeding site content:', err.message);
+  }
+}
+
+async function seedAll() {
+  await Promise.all([
+    seedIfEmpty('portfolio', PORTFOLIO_FILE),
+    seedIfEmpty('testimonials', TESTIMONIALS_FILE),
+    seedIfEmpty('services', SERVICES_FILE),
+    seedIfEmpty('messages', MESSAGES_FILE),
+    seedContentIfEmpty()
+  ]);
+}
+
+/* ---------------------------------------------------------
+   Firebase Auth — verify ID tokens from the client
+   --------------------------------------------------------- */
 async function verifyFirebaseToken(token) {
-  // Verify Firebase ID token using Google's public keys
-  // Split the JWT to get the header and payload
   const parts = token.split('.');
   if (parts.length !== 3) throw new Error('Invalid token format');
-
-  // Decode payload (base64url)
   const payload = JSON.parse(Buffer.from(parts[1].replace(/-/g,'+').replace(/_/g,'/'), 'base64').toString());
-
-  // Check expiry
   const now = Math.floor(Date.now() / 1000);
   if (payload.exp < now) throw new Error('Token expired');
-
-  // Check audience matches our Firebase project
   if (payload.aud !== FIREBASE_PROJECT_ID) throw new Error('Token audience mismatch');
-
-  // Check issuer
   if (payload.iss !== 'https://securetoken.google.com/' + FIREBASE_PROJECT_ID) throw new Error('Invalid issuer');
-
   return payload;
 }
 
@@ -73,24 +169,14 @@ app.use(function(req, res, next) {
 
 app.use(express.static(path.join(__dirname, '..')));
 
-/* ---------------------------------------------------------
-   Helpers
-   --------------------------------------------------------- */
-async function readJSON(filePath) {
-  const raw = await fs.readFile(filePath, 'utf-8');
-  return JSON.parse(raw);
-}
-
-async function writeJSON(filePath, data) {
-  await fs.writeFile(filePath, JSON.stringify(data, null, 2), 'utf-8');
-}
-
 function isBlank(value) {
   return typeof value !== 'string' || value.trim().length === 0;
 }
 
 /* ---------------------------------------------------------
-   File upload API
+   File upload API (legacy — image uploads now go straight
+   to Cloudinary from the browser; this route is unused but
+   left in place harmlessly)
    --------------------------------------------------------- */
 const storage = multer.diskStorage({
   destination: (req, file, cb) => {
@@ -124,7 +210,7 @@ app.post('/api/upload', requireAuth, upload.single('image'), (req, res) => {
    Portfolio API
    --------------------------------------------------------- */
 app.get('/api/portfolio', async (req, res) => {
-  try { res.json(await readJSON(PORTFOLIO_FILE)); }
+  try { res.json(await getAll('portfolio', 'createdAt', 'desc')); }
   catch (err) { res.status(500).json({ error: 'Could not read portfolio data.' }); }
 });
 
@@ -133,45 +219,40 @@ app.post('/api/portfolio', requireAuth, async (req, res) => {
     const { title, category, image, description } = req.body;
     if (isBlank(title) || isBlank(category) || isBlank(image))
       return res.status(400).json({ error: 'title, category, and image are required.' });
-    const items = await readJSON(PORTFOLIO_FILE);
     const newItem = {
       id: crypto.randomUUID(),
       title: title.trim(),
       category: category.trim().toLowerCase(),
       image: image.trim(),
-      description: (description || '').trim()
+      description: (description || '').trim(),
+      createdAt: Date.now()
     };
-    items.unshift(newItem);
-    await writeJSON(PORTFOLIO_FILE, items);
+    await setDoc('portfolio', newItem.id, newItem);
     res.status(201).json(newItem);
   } catch (err) { res.status(500).json({ error: 'Could not save the new item.' }); }
 });
 
 app.put('/api/portfolio/:id', requireAuth, async (req, res) => {
   try {
-    const items = await readJSON(PORTFOLIO_FILE);
-    const idx = items.findIndex(i => i.id === req.params.id);
-    if (idx === -1) return res.status(404).json({ error: 'Item not found.' });
+    const doc = await db.collection('portfolio').doc(req.params.id).get();
+    if (!doc.exists) return res.status(404).json({ error: 'Item not found.' });
     const { title, category, image, description } = req.body;
-    items[idx] = {
-      ...items[idx],
+    const patch = {
       ...(title !== undefined && { title: title.trim() }),
       ...(category !== undefined && { category: category.trim().toLowerCase() }),
       ...(image !== undefined && { image: image.trim() }),
       ...(description !== undefined && { description: description.trim() })
     };
-    await writeJSON(PORTFOLIO_FILE, items);
-    res.json(items[idx]);
+    await updateDoc('portfolio', req.params.id, patch);
+    res.json({ ...doc.data(), ...patch });
   } catch (err) { res.status(500).json({ error: 'Could not update the item.' }); }
 });
 
 app.delete('/api/portfolio/:id', requireAuth, async (req, res) => {
   try {
-    const items = await readJSON(PORTFOLIO_FILE);
-    const next = items.filter(i => i.id !== req.params.id);
-    if (next.length === items.length)
-      return res.status(404).json({ error: 'Item not found.' });
-    await writeJSON(PORTFOLIO_FILE, next);
+    const doc = await db.collection('portfolio').doc(req.params.id).get();
+    if (!doc.exists) return res.status(404).json({ error: 'Item not found.' });
+    await deleteDoc('portfolio', req.params.id);
     res.status(204).end();
   } catch (err) { res.status(500).json({ error: 'Could not delete the item.' }); }
 });
@@ -180,7 +261,7 @@ app.delete('/api/portfolio/:id', requireAuth, async (req, res) => {
    Site content API
    --------------------------------------------------------- */
 app.get('/api/content', async (req, res) => {
-  try { res.json(await readJSON(CONTENT_FILE)); }
+  try { res.json(await getContentDoc()); }
   catch (err) { res.status(500).json({ error: 'Could not read site content.' }); }
 });
 
@@ -189,13 +270,13 @@ app.put('/api/content', requireAuth, async (req, res) => {
     const incoming = req.body;
     if (!incoming || typeof incoming !== 'object')
       return res.status(400).json({ error: 'Invalid content payload.' });
-    const current = await readJSON(CONTENT_FILE);
+    const current = await getContentDoc();
     const mergeableKeys = ['site', 'categories', 'theme', 'about', 'contact', 'footer'];
     const updated = { ...current };
     mergeableKeys.forEach(key => {
       if (incoming[key] !== undefined) updated[key] = incoming[key];
     });
-    await writeJSON(CONTENT_FILE, updated);
+    await setContentDoc(updated);
     res.json(updated);
   } catch (err) { res.status(500).json({ error: 'Could not save site content.' }); }
 });
@@ -204,7 +285,7 @@ app.put('/api/content', requireAuth, async (req, res) => {
    Testimonials API
    --------------------------------------------------------- */
 app.get('/api/testimonials', async (req, res) => {
-  try { res.json(await readJSON(TESTIMONIALS_FILE)); }
+  try { res.json(await getAll('testimonials', 'createdAt', 'desc')); }
   catch (err) { res.status(500).json({ error: 'Could not read testimonials.' }); }
 });
 
@@ -213,37 +294,32 @@ app.post('/api/testimonials', requireAuth, async (req, res) => {
     const { name, role, rating, text, avatar } = req.body;
     if (!name || !text)
       return res.status(400).json({ error: 'Name and text are required.' });
-    const items = await readJSON(TESTIMONIALS_FILE);
     const newItem = {
       id: crypto.randomUUID(),
       name: name.trim(),
       role: (role || '').trim(),
       rating: Number(rating) || 5,
       text: text.trim(),
-      avatar: (avatar || '').trim()
+      avatar: (avatar || '').trim(),
+      createdAt: Date.now()
     };
-    items.unshift(newItem);
-    await writeJSON(TESTIMONIALS_FILE, items);
+    await setDoc('testimonials', newItem.id, newItem);
     res.status(201).json(newItem);
   } catch (err) { res.status(500).json({ error: 'Could not save testimonial.' }); }
 });
 
 app.put('/api/testimonials/:id', requireAuth, async (req, res) => {
   try {
-    const items = await readJSON(TESTIMONIALS_FILE);
-    const idx = items.findIndex(i => i.id === req.params.id);
-    if (idx === -1) return res.status(404).json({ error: 'Not found.' });
-    items[idx] = { ...items[idx], ...req.body };
-    await writeJSON(TESTIMONIALS_FILE, items);
-    res.json(items[idx]);
+    const doc = await db.collection('testimonials').doc(req.params.id).get();
+    if (!doc.exists) return res.status(404).json({ error: 'Not found.' });
+    await updateDoc('testimonials', req.params.id, req.body);
+    res.json({ ...doc.data(), ...req.body });
   } catch (err) { res.status(500).json({ error: 'Could not update testimonial.' }); }
 });
 
 app.delete('/api/testimonials/:id', requireAuth, async (req, res) => {
   try {
-    const items = await readJSON(TESTIMONIALS_FILE);
-    const next = items.filter(i => i.id !== req.params.id);
-    await writeJSON(TESTIMONIALS_FILE, next);
+    await deleteDoc('testimonials', req.params.id);
     res.status(204).end();
   } catch (err) { res.status(500).json({ error: 'Could not delete testimonial.' }); }
 });
@@ -252,7 +328,7 @@ app.delete('/api/testimonials/:id', requireAuth, async (req, res) => {
    Services API
    --------------------------------------------------------- */
 app.get('/api/services', async (req, res) => {
-  try { res.json(await readJSON(SERVICES_FILE)); }
+  try { res.json(await getAll('services', 'createdAt', 'asc')); }
   catch (err) { res.status(500).json({ error: 'Could not read services.' }); }
 });
 
@@ -260,35 +336,30 @@ app.post('/api/services', requireAuth, async (req, res) => {
   try {
     const { icon, title, description } = req.body;
     if (!title) return res.status(400).json({ error: 'Title is required.' });
-    const items = await readJSON(SERVICES_FILE);
     const newItem = {
       id: crypto.randomUUID(),
       icon: (icon || '').trim(),
       title: title.trim(),
-      description: (description || '').trim()
+      description: (description || '').trim(),
+      createdAt: Date.now()
     };
-    items.push(newItem);
-    await writeJSON(SERVICES_FILE, items);
+    await setDoc('services', newItem.id, newItem);
     res.status(201).json(newItem);
   } catch (err) { res.status(500).json({ error: 'Could not save service.' }); }
 });
 
 app.put('/api/services/:id', requireAuth, async (req, res) => {
   try {
-    const items = await readJSON(SERVICES_FILE);
-    const idx = items.findIndex(i => i.id === req.params.id);
-    if (idx === -1) return res.status(404).json({ error: 'Not found.' });
-    items[idx] = { ...items[idx], ...req.body };
-    await writeJSON(SERVICES_FILE, items);
-    res.json(items[idx]);
+    const doc = await db.collection('services').doc(req.params.id).get();
+    if (!doc.exists) return res.status(404).json({ error: 'Not found.' });
+    await updateDoc('services', req.params.id, req.body);
+    res.json({ ...doc.data(), ...req.body });
   } catch (err) { res.status(500).json({ error: 'Could not update service.' }); }
 });
 
 app.delete('/api/services/:id', requireAuth, async (req, res) => {
   try {
-    const items = await readJSON(SERVICES_FILE);
-    const next = items.filter(i => i.id !== req.params.id);
-    await writeJSON(SERVICES_FILE, next);
+    await deleteDoc('services', req.params.id);
     res.status(204).end();
   } catch (err) { res.status(500).json({ error: 'Could not delete service.' }); }
 });
@@ -304,43 +375,40 @@ app.post('/api/contact', async (req, res) => {
     const emailPattern = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
     if (!emailPattern.test(email))
       return res.status(400).json({ error: 'Please enter a valid email address.' });
-    const messages = await readJSON(MESSAGES_FILE);
-    messages.unshift({
+    const newMessage = {
       id: crypto.randomUUID(),
       name: name.trim(),
       email: email.trim(),
       message: message.trim(),
       receivedAt: new Date().toISOString(),
       read: false
-    });
-    await writeJSON(MESSAGES_FILE, messages);
+    };
+    await setDoc('messages', newMessage.id, newMessage);
     res.status(201).json({ ok: true, message: 'Thanks! Your message has been sent.' });
   } catch (err) { res.status(500).json({ error: 'Something went wrong sending your message.' }); }
 });
 
 app.get('/api/messages', requireAuth, async (req, res) => {
-  try { res.json(await readJSON(MESSAGES_FILE)); }
+  try { res.json(await getAll('messages', 'receivedAt', 'desc')); }
   catch (err) { res.status(500).json({ error: 'Could not read messages.' }); }
 });
 
 app.patch('/api/messages/:id', requireAuth, async (req, res) => {
   try {
-    const messages = await readJSON(MESSAGES_FILE);
-    const idx = messages.findIndex(m => m.id === req.params.id);
-    if (idx === -1) return res.status(404).json({ error: 'Message not found.' });
-    if (req.body.read !== undefined) messages[idx].read = !!req.body.read;
-    await writeJSON(MESSAGES_FILE, messages);
-    res.json(messages[idx]);
+    const doc = await db.collection('messages').doc(req.params.id).get();
+    if (!doc.exists) return res.status(404).json({ error: 'Message not found.' });
+    const patch = {};
+    if (req.body.read !== undefined) patch.read = !!req.body.read;
+    await updateDoc('messages', req.params.id, patch);
+    res.json({ ...doc.data(), ...patch });
   } catch (err) { res.status(500).json({ error: 'Could not update message.' }); }
 });
 
 app.delete('/api/messages/:id', requireAuth, async (req, res) => {
   try {
-    const messages = await readJSON(MESSAGES_FILE);
-    const next = messages.filter(m => m.id !== req.params.id);
-    if (next.length === messages.length)
-      return res.status(404).json({ error: 'Message not found.' });
-    await writeJSON(MESSAGES_FILE, next);
+    const doc = await db.collection('messages').doc(req.params.id).get();
+    if (!doc.exists) return res.status(404).json({ error: 'Message not found.' });
+    await deleteDoc('messages', req.params.id);
     res.status(204).end();
   } catch (err) { res.status(500).json({ error: 'Could not delete message.' }); }
 });
@@ -357,8 +425,10 @@ app.use((err, req, res, next) => {
 /* ---------------------------------------------------------
    Start server
    --------------------------------------------------------- */
-app.listen(PORT, () => {
-  console.log(`Portfolio server running at http://localhost:${PORT}`);
-  console.log(`Login page:  http://localhost:${PORT}/login.html`);
-  console.log(`Admin page:  http://localhost:${PORT}/admin.html`);
+seedAll().finally(() => {
+  app.listen(PORT, () => {
+    console.log(`Portfolio server running at http://localhost:${PORT}`);
+    console.log(`Login page:  http://localhost:${PORT}/login.html`);
+    console.log(`Admin page:  http://localhost:${PORT}/admin.html`);
+  });
 });
