@@ -8,11 +8,11 @@
    free account at https://cloudinary.com and an UNSIGNED
    upload preset in Settings > Upload > Upload presets.
    --------------------------------------------------------- */
-  var CLOUDINARY_CLOUD_NAME = 'cia2gvqg';
-  var CLOUDINARY_UPLOAD_PRESET = 'zvyzkjhj';
+var CLOUDINARY_CLOUD_NAME = 'cia2gvqg';
+var CLOUDINARY_UPLOAD_PRESET = 'zvyzkjhj';
 
 async function uploadImageToCloudinary(file) {
-  if (CLOUDINARY_CLOUD_NAME === 'cia2gvqg' || CLOUDINARY_UPLOAD_PRESET === 'zvyzkjhj') {
+  if (CLOUDINARY_CLOUD_NAME === 'YOUR_CLOUD_NAME' || CLOUDINARY_UPLOAD_PRESET === 'YOUR_UPLOAD_PRESET') {
     throw new Error('Cloudinary is not set up yet. Fill in CLOUDINARY_CLOUD_NAME and CLOUDINARY_UPLOAD_PRESET in js/admin.js.');
   }
   var formData = new FormData();
